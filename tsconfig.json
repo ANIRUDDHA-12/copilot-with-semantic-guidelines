@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    // 1. File Layout (Crucial: Keeps your project clean)
+    "rootDir": "./src",
+    "outDir": "./dist",
+    
+    // 2. Environment Settings (Forces modern Node.js ES Module rules)
+    "module": "nodenext",
+    "target": "esnext",
+    "moduleResolution": "nodenext",
+    "lib": ["esnext"],
+    "types": ["node"],
+
+    // 3. Debugging tools
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    // 4. Elite-Level Stricter Typechecking (Catches bugs before runtime)
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // 5. Build/Module Styles
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -22,12 +22,9 @@ export const postgresRetrieverTool = tool(
             const vectorString = `[${Array.from(output.data).join(",")}]`
 
             const dbResult = await dbPool.query(
-                `SELECT kb.content, d.filename
-                 FROM knowledge_base kb
-                 JOIN documents d ON kb.document_id = d.id
-                 ORDER BY kb.embedding <=> $1::text::vector(384) ASC
-                 LIMIT 2`,
-                [vectorString]
+                `SELECT title, content, score
+                 FROM match_documents_hybrid($1, $2::vector(384), 5)`,
+                [query, vectorString]
             )
 
             if (dbResult.rows.length === 0) {

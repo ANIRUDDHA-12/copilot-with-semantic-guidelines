@@ -1,25 +1,29 @@
-import express, { Router } from 'express'
 import multer from 'multer'
-import pdf from '@cedrugs/pdf-parse'
-import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
-import {pipeline} from '@xenova/transformers'
+import express from 'express'
+import fs from 'fs/promises'
+import os from 'os'
+import { pdfQueue } from '../../workers/pdfWorker.js'
+// import pdf from '@cedrugs/pdf-parse'
+// import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
+// import {pipeline} from '@xenova/transformers'
 import { authenticateToken } from '../auth.js'
-import { dbPool } from '../../db/pool.js'
-import { normalize } from 'node:path'
-export const uploadRouter = express.Router()
+import path from 'path'
+// import { dbPool } from '../../db/pool.js'
+// import { pdfQueue } from '../../workers/pdfWorker.js'
 
+
+const uploadRouter = express.Router()
 const upload = multer({
-    storage:multer.memoryStorage(),
-    limits:{fileSize:10*1024*1024}
+    storage:multer.memoryStorage()
 })
 
-let embedder: any = null;
-async function getEmbedder() {
-    if (!embedder) {
-        embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-    }
-    return embedder;
-}
+// let embedder: any = null;
+// async function getEmbedder() {
+//     if (!embedder) {
+//         embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+//     }
+//     return embedder;
+// }
 
 uploadRouter.post('/pdf',authenticateToken,upload.single('document'),async(req,res)=>{
     try{
@@ -32,57 +36,63 @@ uploadRouter.post('/pdf',authenticateToken,upload.single('document'),async(req,r
 
         console.log(`File Recieved ,${file.originalname},${file.size} bytes`)
 
-        const result = await pdf(file.buffer)
-        const rawText = result.text.replace(/\x00/g, '').trim()
+        const tempFilePath = path.join(os.tmpdir(),`${Date.now()}-${file.size}bytes`)
+        await fs.writeFile(tempFilePath,file.buffer)
+
+        const job = await pdfQueue.add('pdf-processing-queue',{
+            filePath:tempFilePath,
+            originalName:file.originalname,
+            userId:userId
+        })  
+
+        return res.status(202).json({
+            message:"PDF Uploaded Sucessfully,Worker working in Background",
+            jobId:job.id
+        })
+
+        // const result = await pdf(file.buffer)
+        // const rawText = result.text.replace(/\x00/g, '').trim()
         // const rawText= result.text
 
-        if(!rawText || rawText.length ===0){
-            return res.status(400).json({ 
-                error: "Extraction Failed: This PDF appears to be an image or a scanned document without a readable text layer." 
-            })
-        }
-
-        const splitter = new RecursiveCharacterTextSplitter({
-            chunkSize:1000,
-            chunkOverlap:200
-        })
-
-        const chunks = await splitter.splitText(rawText)
-
-        console.log(`[ETL] Success! Text split into ${chunks.length} distinct chunks.`)
-        const generateEmbedding = await getEmbedder()
-
-        const docResult = await dbPool.query(
-            'INSERT INTO documents (user_id, filename) VALUES ($1, $2) RETURNING id',
-            [userId, file.originalname]
-        )
-        const documentId = docResult.rows[0].id
-
-        for(let i =0;i<chunks.length;i++){
-            const chunkText =chunks[i]
-
-            const output =await generateEmbedding(chunkText,{pooling:"mean",normalize:true})
-            const vectorArray = Array.from(output.data)
-
-            const vectorString= `[${vectorArray.join(',')}]`
-
-            await dbPool.query(
-                'INSERT INTO knowledge_base (document_id, chunk_index, content, embedding) VALUES ($1, $2, $3, $4)',
-                [documentId, i, chunkText, vectorString]
-            )
-
-        }
-        console.log(`[ETL] Complete! Saved ${chunks.length} vectors to database.`)
-
-        return res.status(200).json({
-           message: "PDF parsed and chunked successfully!",
-           documentId,
-           totalChunks:chunks.length
-        })
     }catch(error){
-        console.log(`[ETL] ERROR`,error)
-        return res.status(500).json({error:"Failed to Parse the PDF"})
+        console.log(`[API] ERROR`,error)
+        return res.status(500).json({error:"Failed to Queue the Pdf"})
     }
 })
+
+uploadRouter.get('/status/:jobId', authenticateToken, async (req, res) => {
+    try {
+        const { jobId }  = req.params;
+
+        if(!jobId || typeof jobId !== 'string'){
+            return res.status(400).json({ error: "Invalid or missing Job ID." })
+        }
+
+        // 1. Ask Redis to find the exact job ticket
+        const job = await pdfQueue.getJob(jobId);
+
+        if (!job) {
+            return res.status(404).json({ error: "Job not found in queue." });
+        }
+
+        // 2. Extract the current status of the job
+        const state = await job.getState(); // e.g., 'waiting', 'active', 'completed', 'failed'
+        const progress = job.progress;      // The percentage we set in the worker!
+        const failedReason = job.failedReason; // If it crashed, tell the UI why
+
+        // 3. Send the status back to the frontend
+        return res.status(200).json({
+            jobId: job.id,
+            state: state,
+            progress: progress,
+            error: failedReason || null
+        });
+
+    } catch (error) {
+        console.error(`[API] Error fetching job status:`, error);
+        return res.status(500).json({ error: "Failed to fetch job status." });
+    }
+})
+export default uploadRouter
 
 

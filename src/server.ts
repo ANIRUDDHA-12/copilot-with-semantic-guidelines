@@ -8,10 +8,19 @@ import { dbPool } from './db/pool.js';
 
 
 import { chatRouter } from './middleware/routes/chat.js';
-import { uploadRouter } from './middleware/routes/upload.js';
+import uploadRouter from './middleware/routes/upload.js'
 import { authRouter } from './middleware/routes/auth.js';
 // import { configDotenv } from 'dotenv';
 
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('🚨 [CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
+    // The server stays alive!
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('🚨 [CRITICAL] Uncaught Exception thrown:', error);
+    // The server stays alive!
+})
 
 
 

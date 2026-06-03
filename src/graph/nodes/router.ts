@@ -13,10 +13,10 @@ const groq = new ChatGroq({
 })
 
 export async function routerNode(state:  typeof GraphState.State){
-    const runTimeCategories = ["Tech_Support","Billing","General"] as const
+    const runTimeCategories = ["Tech_Support","Billing","General","HR"] as const
 
     const routingSchema = z.object({
-        category:z.enum(runTimeCategories).describe("Categorize the user's request into one of these exact types.")})
+        category:z.enum(runTimeCategories).describe("Categorize the user's question into one of these buckets: 'Tech_Support', 'Billing', 'HR', or 'General'.")})
     
     const structuredLLM = groq.withStructuredOutput(routingSchema)
 

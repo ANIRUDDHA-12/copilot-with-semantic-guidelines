@@ -1,43 +1,63 @@
-import { pipeline, Pipeline } from "@xenova/transformers";
+import { pipeline } from "@xenova/transformers";
 import { dbPool } from "../../db/pool.js";
-import { type IGraphState } from "../state.js";
+import { GraphState } from "../state.js"; 
+
+
+// Fix 1: Create a global variable to hold the AI model in memory
+let embedderPipeline: any = null;
 
 /**
  * @param state - The current short-term memory of the graph
  */
+export async function retrieveNode(state: typeof GraphState.State) { 
+    console.log("[RETRIEVE] Commencing Hybrid Search query execution...")
 
-export async function retrieveNode(state:IGraphState):Promise<Partial<IGraphState>>{
-    const currentQuery = state.standalone_query || "sample query"
+    // We grab the last message the user sent
+    // const currentQuery = state.messages[state.messages.length - 1]?.content || "sample query";
+    const lastMessage = state.messages[state.messages.length-1]
 
-    if(!currentQuery || typeof currentQuery !== 'string'){
-        throw new Error("No valid query found in the text")
+    if (!lastMessage) {
+        throw new Error("No valid query found in the text");
+    }
+    const queryText = typeof lastMessage === 'string'?lastMessage:lastMessage.content
+console.log(`[DEBUG RETRIEVE DRIVER] The actual string being searched is: "${queryText}"`);
+
+    if(!queryText || typeof queryText!=='string'){
+        throw new Error(`No valid query found in it`)
     }
 
-    const generateEmbedding = await pipeline('feature-extraction','Xenova/all-MiniLM-L6-v2')
+    try{
 
-    const output = await generateEmbedding(currentQuery,{pooling:'mean',normalize:true})
+        if (!embedderPipeline) {
+            console.log("[RETRIEVE] Initializing local embedding model...");
+            embedderPipeline = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+        }
+        console.log("[RETRIEVE] Generating embedding vector...")
+        const output = await embedderPipeline(queryText, { pooling: 'mean', normalize: true });
+        const queryEmbedding = Array.from(output.data);
+        const vectorString = `[${queryEmbedding.join(",")}]`
 
-    const response = Array.from(output.data)
+        const dbResult = await dbPool.query(
+            "SELECT id, title, content, score FROM match_documents_hybrid($1, $2, $3)",
+            [queryText, vectorString, 5])
 
-    const sql = `
-        SELECT document_name,chunk_text
-        from knowledge_chunks
-        order by embedding <=> $1
-        limit 3
-    `
+            const rawRows = dbResult.rows
+            console.log(`[RETRIEVE] Database returned ${rawRows.length} high-relevance matches via RRF.`)
 
-    const values = [JSON.stringify(response)]
-    const result = await dbPool.query(sql,values)
+            const formattedDocs = rawRows.map((row: any) => {
+            return {
+                title: row.title,
+                content: row.content
+            };
+        });
 
-    const FormattedDocs = result.rows.map((row)=>({
-        title: row.document_name,
-        content: row.chunk_text
-    }))
+        return {
+            retrieve_docs: formattedDocs
+        }
 
-    // 3. Return the state update object
-    console.log(`[RETRIEVE] Successfully fetched ${FormattedDocs.length} relevant context chunks.`)
-    return {
-        retrieved_docs:FormattedDocs
-    }
-
+    }catch(error){
+        console.error("[RETRIEVE NODE CRITICAL ERROR]:", error)
+        throw error;
+    }   
 }
+

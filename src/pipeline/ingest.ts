@@ -4,7 +4,7 @@ import { insertKnowledgeChunk } from "../db/pool.js"
 
 async function runIngestion(){
     console.log("1.Shredding the document")
-    const chunks = await chunkMarkdownByHeaders('./test.md')
+    const chunks = await chunkMarkdownByHeaders('./company_policy.md')
 
     console.log(`[INGEST] Found ${chunks.length} chunks. Loading AI model (this takes a few seconds on first run)...`)
     const generateEmbedding = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2')

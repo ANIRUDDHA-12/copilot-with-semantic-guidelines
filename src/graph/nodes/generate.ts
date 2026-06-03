@@ -23,6 +23,10 @@ const groq = new ChatGroq({
         .map(doc => `--- ${doc.title} ---\n${doc.content}`)
         .join("\n\n")
 
+    console.log("\n=== WHAT THE LLM IS READING ===");
+    console.log(contextString);
+    console.log("===============================\n")    
+
     const systemPrompt = `You are a highly professional Enterprise Support Agent.
 Your task is to answer the user's question using ONLY the retrieved context provided below.
 
@@ -43,6 +47,7 @@ const messages = [
     const response = await groq.invoke(messages)
 
     console.log("[GENERATE] Draft complete.");
+
     return {
         messages: [response] 
     }

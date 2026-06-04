@@ -51,7 +51,7 @@ export const postgresRetrieverTool = tool(
         }
     },
     {
-        name: "search_internal_documents",
+        name: "search",
         description: "Always use this tool first when a user asks about internal company policies, uploaded PDFs, or specific rules.",
         schema: z.object({
             query: z.string().describe("The specific search phrase to look up in the vector database.")

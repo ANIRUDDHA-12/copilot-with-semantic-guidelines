@@ -16,10 +16,8 @@ async function getEmbedder() {
     return embedder;
 }
 
-const redisConnection = new Redis({
-    host:process.env.REDIS_HOST || '127.0.0.1',
-    port:parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest:0
+const redisConnection = new Redis(process.env.REDIS_URL!,{
+    maxRetriesPerRequest:null
 })
 
 export const pdfQueue = new Queue('pdf-processing-queue',{

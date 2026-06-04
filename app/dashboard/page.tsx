@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useChatStore } from '@/stores/useChatStore';
 import { useDocumentStore } from '@/stores/useDocumentStore';
 import DocumentPanel from '@/components/documents/DocumentPanel';
+import ChatPanel from '@/components/chat/ChatPanel';
 
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
@@ -62,11 +63,9 @@ export default function DashboardPage() {
           <DocumentPanel />
         </aside>
 
-        {/* Right Panel: Chat (Placeholder for Phase 4) */}
-        <section className="flex-1 bg-bg-primary flex flex-col items-center justify-center relative p-8 overflow-y-auto">
-          <div className="text-sm text-text-muted">
-            Chat coming in Phase 4
-          </div>
+        {/* Right Panel: Chat */}
+        <section className="flex-1 bg-bg-primary flex flex-col relative overflow-hidden">
+          <ChatPanel />
         </section>
       </main>
     </div>

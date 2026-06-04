@@ -53,7 +53,9 @@ chatRouter.post('/',authenticateToken,bucketRateLimiter,async(req,res)=>{
     
                 res.write(`data:${JSON.stringify({token:cacheResult.rows[0].ai_response})}\n\n`)
                 res.write(`data:[DONE]\n\n`)
-                return res.end()
+                res.end()
+
+                return
             }
     
             console.log(`No available Cached Data,Routing to Langgraph`)

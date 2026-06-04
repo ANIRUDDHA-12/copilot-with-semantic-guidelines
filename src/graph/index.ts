@@ -12,9 +12,11 @@ const tools =[postgresRetrieverTool,webSearchTool] as any[]
 const llm = new ChatGroq({
     model:"llama-3.3-70b-versatile",
     temperature:0
-})
+}) 
 
-const llmWithTools= llm.bindTools(tools)
+// const llmWithTools= llm.bindTools(tools,{
+//     parallel_tool_calls:false
+// })
 
 const toolNode = new ToolNode(tools)
 
@@ -22,18 +24,18 @@ async function callModel(state: typeof GraphState.State) {
     console.log("[GRAPH]  Groq Agent is thinking...")
 
     const systemPrompt = new SystemMessage(
-        "You are an expert document retrieval assistant. " +
-        "You have access to a database of user-uploaded PDFs and documents. " +
-        "CRITICAL RULES: " +
-        "1. ALWAYS read the text returned by your tools carefully. The text may contain heavy OCR noise (random letters/numbers like 72F4X237). Ignore the noise and find the actual English words. " +
-        "2. DO NOT call the search tool multiple times for the exact same question. One search is enough. " +
-        "3. If the answer is in the retrieved text, provide a short, concise answer. " +
-        "4. If the retrieved text does NOT contain the answer, DO NOT guess or hallucinate. Simply reply: 'I cannot find the answer in the uploaded documents.'"
+      "You are an expert document retrieval assistant with access to a 'search' tool. " +
+    "CRITICAL SEARCH RULE: When using the search tool, do not search using full sentences or conversational questions. " +
+    "Instead, extract only the core technical keywords, acronyms, or specific phrases from the user's request and search using those terms. " +
+    "CORE RULES: " +
+    "1. Read tool results carefully and ignore OCR noise (e.g., '72F4X237'). " +
+    "2. If the answer is found in the retrieved text, provide a short, direct answer. " +
+    "3. If the retrieved text does not contain the answer, reply exactly: 'I cannot find the answer in the uploaded documents.'"
     )
     const messagesWithSystem = [systemPrompt, ...state.messages]
     
     // Pass the message history straight to the model
-    const response = await llmWithTools.invoke(messagesWithSystem);
+    const response = await llm.invoke(messagesWithSystem);
     
     // Return the updated state
     return { messages: [response] };

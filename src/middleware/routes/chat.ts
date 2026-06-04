@@ -14,13 +14,20 @@ let embedderPipeline: any = null
 chatRouter.post('/',authenticateToken,bucketRateLimiter,async(req,res)=>{
      try {
             const userId = req.user?.user_id
+            
                 console.log(`[AUTH] Request authorized for User ID: ${userId}`)
     
     
             const userMessage = req.body.message;
+            const threadId = req.body.threadId || req.user?.user_id
             if (!userMessage) {
                 return res.status(400).json({ error: "Missing message" });
             }
+
+    //         const config = { 
+    // configurable: { thread_id: threadId },
+    // version: "v2" 
+    // } 
     
             if(!embedderPipeline){
                 console.log("Initializing extraction pipeline")
@@ -40,7 +47,7 @@ chatRouter.post('/',authenticateToken,bucketRateLimiter,async(req,res)=>{
     
             if(cacheResult.rows.length>0){
                 console.log(`Cached Response Found ,Bypassing Langgraph`)
-                res.setHeader('Content-Type','text/stream')
+                res.setHeader('Content-Type','text/event-stream')
                 res.setHeader('Cache-Control','no-cache')
                 res.setHeader('Connection','keep-alive')
     
@@ -56,7 +63,12 @@ chatRouter.post('/',authenticateToken,bucketRateLimiter,async(req,res)=>{
                 user_id:userId
             }
     
-            const eventStream = graph.streamEvents(initialState,{version:"v2"})
+            const eventStream = graph.streamEvents(initialState,{
+                configurable: { thread_id: threadId,
+                    user_id:userId
+                 },
+            version: "v2"
+            })
             let streamInitialized = false
             let isGeneratingAnswer = false
             let fullAiResponse = ""

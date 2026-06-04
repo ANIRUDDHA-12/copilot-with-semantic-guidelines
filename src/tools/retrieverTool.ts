@@ -2,12 +2,19 @@ import { tool } from "@langchain/core/tools";
 import {z} from 'zod'
 import { pipeline } from "@xenova/transformers"
 import { dbPool } from "../db/pool.js";
-import { SystemMessage } from "@langchain/core/messages"
+import { type RunnableConfig } from "@langchain/core/runnables";
+// import { SystemMessage } from "@langchain/core/messages"
 
 let embedderPipeline:any=null
 
 export const postgresRetrieverTool = tool(
-    async({query})=>{
+    async({query},config:RunnableConfig)=>{
+        const userId = config?.configurable?.user_id
+
+        if(!userId){
+            console.error("[TOOL] Missing userId in tool config!");
+            return "An error occurred: User context lost."
+        }
         console.log(`[TOOL]  AI chose to search the database for: "${query}"`)
 
         if(!embedderPipeline){
@@ -23,8 +30,8 @@ export const postgresRetrieverTool = tool(
 
             const dbResult = await dbPool.query(
                 `SELECT title, content, score
-                 FROM match_documents_hybrid($1, $2::vector(384), 5)`,
-                [query, vectorString]
+                 FROM match_documents_hybrid($1, $2::vector(384), 5,$3)`,
+                [query, vectorString,userId]
             )
 
             if (dbResult.rows.length === 0) {

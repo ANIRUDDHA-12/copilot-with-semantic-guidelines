@@ -14,7 +14,10 @@ import path from 'path'
 
 const uploadRouter = express.Router()
 const upload = multer({
-    storage:multer.memoryStorage()
+    storage:multer.memoryStorage(),
+    limits: {
+        fileSize: 50 * 1024 * 1024 // 50 Megabytes limit
+    }
 })
 
 // let embedder: any = null;

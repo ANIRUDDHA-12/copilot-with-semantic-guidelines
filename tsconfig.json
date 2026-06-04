@@ -1,35 +1,67 @@
 {
   "compilerOptions": {
     // 1. File Layout (Crucial: Keeps your project clean)
-    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    // "ignoreDeprecations": "6.0",
     "outDir": "./dist",
-    
     // 2. Environment Settings (Forces modern Node.js ES Module rules)
-    "module": "nodenext",
+    "module": "esnext",
     "target": "esnext",
-    "moduleResolution": "nodenext",
-    "lib": ["esnext"],
-    "types": ["node"],
-
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable"
+    ],
+    "types": [
+      "node"
+    ],
     // 3. Debugging tools
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-
     // 4. Elite-Level Stricter Typechecking (Catches bugs before runtime)
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-
     // 5. Build/Module Styles
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+    // "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*",
+    "lib/**/*",
+    "stores/**/*",
+    "app/**/*",
+    "components/**/*",
+    "middleware.ts",
+    "tailwind.config.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

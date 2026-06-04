@@ -39,6 +39,7 @@ pgdata/
 .cache/
 transformers_cache/
 models/
+.next/
 
 # ==========================================
 # 6. IDEs, Editors and OS Files

@@ -39,7 +39,7 @@ export const postgresRetrieverTool = tool(
             }
 
             const formattedDocs = dbResult.rows
-            .map((row,index)=>`Source: ${row.filename}\nContent:\n${row.content}\n---`)
+            .map((row)=>`Source: ${row.filename}\nContent:\n${row.content}\n---`)
             .join(`\n\n`)
 
             console.log(`[TOOL]  Found ${dbResult.rows.length} relevant PDF chunks.`)

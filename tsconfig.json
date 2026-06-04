@@ -7,7 +7,7 @@
         "./*"
       ]
     },
-    // "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "6.0",
     "outDir": "./dist",
     // 2. Environment Settings (Forces modern Node.js ES Module rules)
     "module": "esnext",

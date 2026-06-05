@@ -15,14 +15,15 @@ import  { documentRouter } from './middleware/routes/documents.js';
 
 const app = express();
 
-const formattedFrontendUrl = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.replace(/\/$/, '')
-    : ''
+// const formattedFrontendUrl = process.env.FRONTEND_URL
+//     ? process.env.FRONTEND_URL.replace(/\/$/, '')
+//     : ''
 app.use(cors({
     origin: [
-        'http://localhost:5000', 
-        'http://localhost:3001',
-        formattedFrontendUrl
+        'http://localhost:3000', 
+        'http://localhost:3001', 
+        'http://localhost:5000',
+        'https://copilot-with-semantic-guidelines.vercel.app' // ✨ Hardcoded exact match
     ],
     credentials: true,
 }));

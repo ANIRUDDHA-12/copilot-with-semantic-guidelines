@@ -1,7 +1,7 @@
 // Phase 4 — Chat panel
 import { useChatStore } from '@/stores/useChatStore';
 
-
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 export function useSSEStream() {
   const startStream = async (message: string, threadId: string, token: string) => {
     const { 
@@ -15,7 +15,7 @@ export function useSSEStream() {
     } = useChatStore.getState();
 
     try {
-      const response = await fetch('http://localhost:3000/api/chat', {
+      const response = await fetch(`${BACKEND_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

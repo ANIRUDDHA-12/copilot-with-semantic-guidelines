@@ -1,5 +1,6 @@
 // Phase 1 — Foundation
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   // Use lazy dynamic imports inside the function to avoid circular dependencies
   const { useAuthStore } = await import('@/stores/useAuthStore');
@@ -10,7 +11,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   const url = endpoint.startsWith('http') 
     ? endpoint 
-    : `http://localhost:3000${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    : `${BACKEND_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
   const headers = new Headers(options.headers || {});
   

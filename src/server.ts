@@ -109,7 +109,7 @@ app.use(cors({
     origin: [
         'http://localhost:5000', 
         'http://localhost:3001',
-        process.env.FRONTEND_URL
+        process.env.FRONTEND_URL || ''
     ],
     credentials: true,
 }));

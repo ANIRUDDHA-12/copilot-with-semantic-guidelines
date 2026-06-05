@@ -28,7 +28,7 @@ app.use(cors({
     credentials: true,
 }));
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
     res.status(200).json({ status: 'awake', message: 'Server is active' });
 })
 

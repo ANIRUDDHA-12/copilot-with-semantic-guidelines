@@ -24,7 +24,7 @@ process.on('uncaughtException', (error) => {
 
 
 const app = express();
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 5000
 
 
 // app.post('/api/register',async(req,res)=>{
@@ -107,7 +107,7 @@ const PORT = process.env.PORT || 3000
 
 app.use(cors({
     origin: [
-        'http://localhost:3000', 
+        'http://localhost:5000', 
         'http://localhost:3001',
         // process.env.FRONTEND_URL
     ],
@@ -121,4 +121,4 @@ app.use('/api/documents',documentRouter)
 app.use('/api/auth',authRouter)
 
 
-app.listen(3000, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(5000, () => console.log(`🚀 Server running on port ${PORT}`));

@@ -105,7 +105,14 @@ const PORT = process.env.PORT || 3000
         
 // })
 
-app.use(cors())
+app.use(cors({
+    origin: [
+        'http://localhost:3000', 
+        'http://localhost:3001',
+        process.env.FRONTEND_URL
+    ],
+    credentials: true,
+}));
 app.use(express.json())
 
 app.use('/api/chat',chatRouter)

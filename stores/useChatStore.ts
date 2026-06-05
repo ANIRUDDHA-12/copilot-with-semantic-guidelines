@@ -1,5 +1,6 @@
 // Phase 1 — Foundation (Refactored Phase 4)
 import { create } from 'zustand';
+// const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export interface ChatMessage {
   id: string;

@@ -131,8 +131,9 @@ function decodeJwtPayload(token: string): any {
 //     set({ authError: null });
 //   }
 // }));
-
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 export const useAuthStore = create<AuthState>()(
+  
   persist(
     (set, get) => ({
       token: null,
@@ -145,7 +146,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, authError: null });
         
         try {
-          const response = await fetch('http://localhost:3000/api/auth/login', {
+          const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
@@ -186,7 +187,7 @@ export const useAuthStore = create<AuthState>()(
       register: async (email: string, password: string) => {
         set({ isLoading: true, authError: null });
         try {
-          const response = await fetch('http://localhost:3000/api/auth/register', {
+          const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),

@@ -5,10 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "next dev",
-    "server": "tsx watch src/server.ts"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "dev": "concurrently \"next dev\" \"tsx watch src/server.ts\"",
+  "build": "next build",
+  "start:backend": "tsx src/server.ts"
+        },
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -28,6 +28,10 @@ app.use(cors({
     credentials: true,
 }));
 
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'awake', message: 'Server is active' });
+})
+
 process.on('unhandledRejection', (reason, promise) => {
     console.error('🚨 [CRITICAL] Unhandled Rejection at:', promise, 'reason:', reason);
     // The server stays alive!

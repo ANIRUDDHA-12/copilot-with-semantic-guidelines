@@ -11,12 +11,18 @@ import { authRouter } from './middleware/routes/auth.js';
 import  { documentRouter } from './middleware/routes/documents.js';
 // import { configDotenv } from 'dotenv';
 
+
+
 const app = express();
+
+const formattedFrontendUrl = process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.replace(/\/$/, '')
+    : ''
 app.use(cors({
     origin: [
         'http://localhost:5000', 
         'http://localhost:3001',
-        process.env.FRONTEND_URL || ''
+        formattedFrontendUrl
     ],
     credentials: true,
 }));

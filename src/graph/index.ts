@@ -14,9 +14,9 @@ const llm = new ChatGroq({
     temperature:0
 }) 
 
-const llmWithTools= llm.bindTools(tools,{
-    parallel_tool_calls:false
-})
+// const llmWithTools= llm.bindTools(tools,{
+//     parallel_tool_calls:false
+// })
 
 const toolNode = new ToolNode(tools)
 
@@ -35,7 +35,7 @@ async function callModel(state: typeof GraphState.State) {
     const messagesWithSystem = [systemPrompt, ...state.messages]
     
     // Pass the message history straight to the model
-    const response = await llmWithTools.invoke(messagesWithSystem);
+    const response = await llm.invoke(messagesWithSystem);
     
     // Return the updated state
     return { messages: [response] };

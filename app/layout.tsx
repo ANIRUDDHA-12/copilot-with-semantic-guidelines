@@ -31,11 +31,7 @@ export default function RootLayout({
       >
         <ServerGuard />
         {children}
-        <Script 
-          src="https://feedloop.io/widget.js" 
-          data-project-id="1b56680a-3a79-4fce-9de5-ed8e2b74d47a"
-          strategy="afterInteractive"
-        />
+        <script src="https://browser-analytics-eta.vercel.app/widget.js" data-project-id="7f2db389-fede-4b16-bb5d-3b4d6b54a987" defer></script>
       </body>
     </html>
   );

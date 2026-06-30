@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import ServerGuard from '@/components/ServerGuard/ServerGuard';
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,6 +31,11 @@ export default function RootLayout({
       >
         <ServerGuard />
         {children}
+        <Script 
+          src="https://feedloop.io/widget.js" 
+          data-project-id="1b56680a-3a79-4fce-9de5-ed8e2b74d47a"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

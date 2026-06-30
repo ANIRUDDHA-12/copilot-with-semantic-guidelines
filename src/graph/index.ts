@@ -14,28 +14,29 @@ const llm = new ChatGroq({
     temperature:0
 }) 
 
-// const llmWithTools= llm.bindTools(tools,{
-//     parallel_tool_calls:false
-// })
+const llmWithTools= llm.bindTools(tools,{
+    tool_choice:"auto",
+    parallel_tool_calls:false
+})
 
 const toolNode = new ToolNode(tools)
 
 async function callModel(state: typeof GraphState.State) {
     console.log("[GRAPH]  Groq Agent is thinking...")
 
-    const systemPrompt = new SystemMessage(
+   const systemPrompt = new SystemMessage(
     "You are an expert assistant with access to an internal 'search' tool and a web search tool. " +
     "CRITICAL RULES: " +
-    "1. ALWAYS use the 'search' tool first if the user asks about specific projects, companies, proper nouns, or acronyms (e.g., 'Aegis AI', 'CoolCity AI', etc.). " +
+    "1. ALWAYS use the 'search' tool first if the user asks about specific projects, companies, proper nouns, or acronyms (e.g., 'Aegis AI', 'CoolCity AI'). " +
     "2. If the user asks about internal company policies, uploaded PDFs, or specific rules, use the 'search' tool. " +
     "3. When using the internal search tool, extract ONLY the core technical keywords (e.g., search for 'CoolCity AI', not 'What is CoolCity AI'). " +
     "4. If the user asks about real-time events outside the documents, use the web search tool. " +
-    "5. ABSOLUTE FORMATTING RULE: You must use the provided JSON tool calling API. NEVER output raw XML tags like <function>."
+    "5. Do NOT explain your thought process. Do NOT output raw JSON or XML text in your response. Simply invoke the tool."
 );
     const messagesWithSystem = [systemPrompt, ...state.messages]
     
     // Pass the message history straight to the model
-    const response = await llm.invoke(messagesWithSystem);
+    const response = await llmWithTools.invoke(messagesWithSystem);
     
     // Return the updated state
     return { messages: [response] };

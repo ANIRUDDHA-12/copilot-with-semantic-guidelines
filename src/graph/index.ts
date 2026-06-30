@@ -14,29 +14,28 @@ const llm = new ChatGroq({
     temperature:0
 }) 
 
-const llmWithTools= llm.bindTools(tools,{
-    tool_choice:"auto",
-    parallel_tool_calls:false
-})
+// const llmWithTools= llm.bindTools(tools,{
+//     parallel_tool_calls:false
+// })
 
 const toolNode = new ToolNode(tools)
 
 async function callModel(state: typeof GraphState.State) {
     console.log("[GRAPH]  Groq Agent is thinking...")
 
-   const systemPrompt = new SystemMessage(
-    "You are an expert assistant with access to an internal 'search' tool and a web search tool. " +
-    "CRITICAL RULES: " +
-    "1. ALWAYS use the 'search' tool first if the user asks about specific projects, companies, proper nouns, or acronyms (e.g., 'Aegis AI', 'CoolCity AI'). " +
-    "2. If the user asks about internal company policies, uploaded PDFs, or specific rules, use the 'search' tool. " +
-    "3. When using the internal search tool, extract ONLY the core technical keywords (e.g., search for 'CoolCity AI', not 'What is CoolCity AI'). " +
-    "4. If the user asks about real-time events outside the documents, use the web search tool. " +
-    "5. Do NOT explain your thought process. Do NOT output raw JSON or XML text in your response. Simply invoke the tool."
-);
+    const systemPrompt = new SystemMessage(
+      "You are an expert document retrieval assistant with access to a 'search' tool. " +
+    "CRITICAL SEARCH RULE: When using the search tool, do not search using full sentences or conversational questions. " +
+    "Instead, extract only the core technical keywords, acronyms, or specific phrases from the user's request and search using those terms. " +
+    "CORE RULES: " +
+    "1. Read tool results carefully and ignore OCR noise (e.g., '72F4X237'). " +
+    "2. If the answer is found in the retrieved text, provide a short, direct answer. " +
+    "3. If the retrieved text does not contain the answer, reply exactly: 'I cannot find the answer in the uploaded documents.'"
+    )
     const messagesWithSystem = [systemPrompt, ...state.messages]
     
     // Pass the message history straight to the model
-    const response = await llmWithTools.invoke(messagesWithSystem);
+    const response = await llm.invoke(messagesWithSystem);
     
     // Return the updated state
     return { messages: [response] };
